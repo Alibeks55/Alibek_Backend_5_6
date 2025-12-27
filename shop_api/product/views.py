@@ -10,29 +10,33 @@ from .serializers import CategoryListSerializers, CategoryDetailSerializers, Pro
     CategoryValidateSerializer, ProductValidateSerializer, ReviewValidateSerializer, CategorySerializers, \
     ProductSerializers, ReviewSerializers
 from .pagination import CustomPagination
-
+from common.permissions import IsAnonymous, IsModerator
 
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializers
     pagination_class = CustomPagination
+    permission_classes = [IsAnonymous | IsModerator]
     lookup_field = 'id'
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
     pagination_class = CustomPagination
+    permission_classes = [IsAnonymous | IsModerator]
     lookup_field = 'id'
 
 class ReviewViewSet(ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializers
     pagination_class = CustomPagination
+    permission_classes = [IsAnonymous | IsModerator]
     lookup_field = 'id'
 
 class ProductReviewViewSet(ListAPIView):
     queryset = Product.objects.select_related('category').prefetch_related('reviews').all()
     serializer_class = ProductReviewListSerializers
+
 
 
 
