@@ -60,7 +60,8 @@ class RegistrationAPIView(CreateAPIView):
                 password=password,
                 phone_number=phone_number,
                 birthdate=birthdate,
-                is_active=False
+                is_active=False,
+                registration_source = 'local'
             )
 
             code = ''.join(random.choices(string.digits, k=6))

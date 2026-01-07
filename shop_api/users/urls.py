@@ -1,8 +1,8 @@
 from django.urls import path
 from . import  views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-
 from .views import CustomTokenObtainPairView
+from users.google_ouath import GoogleLoginAPIView
 
 urlpatterns = [
     path('registration/', views.RegistrationAPIView.as_view()),
@@ -12,4 +12,6 @@ urlpatterns = [
     path('jwt/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('jwt/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('jwt/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+
+    path('google-login', GoogleLoginAPIView.as_view()),
 ]

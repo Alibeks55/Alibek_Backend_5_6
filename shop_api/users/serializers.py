@@ -4,6 +4,8 @@ from rest_framework_simplejwt.tokens import Token
 from users.models import UsersCod, CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+class OauthCodeSerializer(serializers.Serializer):
+    code = serializers.CharField()
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
@@ -20,6 +22,7 @@ class UserBaseSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
     phone_number = serializers.CharField(required=False)
+    birthdate = serializers.DateField(required=False)
 
 
 class UserAuthSerializer(UserBaseSerializer):
