@@ -8,10 +8,11 @@ from .serializers import (UserCreateSerializer,
                           UserAuthSerializer,
                           ConfirmationSerializer,
                           CustomTokenObtainPairSerializer)
-from users.models import UsersCod, CustomUser
+from users.models import  CustomUser
 import random
 import string
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.core.cache import cache
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -65,11 +66,11 @@ class RegistrationAPIView(CreateAPIView):
             )
 
             code = ''.join(random.choices(string.digits, k=6))
-
-            users_cod = UsersCod.objects.create(
-                user=user,
-                code=code
+            cache.set(f'user_confirm_code:{user.id}',
+                      code,
+                      timeout=300
             )
+
         return Response(
             status=status.HTTP_201_CREATED,
             data={
@@ -87,15 +88,31 @@ class ConfirmUserAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
 
         user_id = serializer.validated_data['user_id']
+        code_from_user = serializer.validated_data['code']
+
+        key = f'user_confirm_code:{user_id}'
+        saved_code = cache.get(key)
+
+        if saved_code is None:
+            return Response(
+                {'error': 'Confirmation code expired or invalid'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if saved_code != code_from_user:
+            return Response(
+                {'error': 'Incorrect confirmation code'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         with transaction.atomic():
             user = CustomUser.objects.get(id=user_id)
             user.is_active = True
             user.save()
 
-            token, _ = Token.objects.get_or_create(user=user)
+            cache.delete(key)
 
-            UsersCod.objects.filter(user=user).delete()
+            token, _ = Token.objects.get_or_create(user=user)
 
         return Response(
             status=status.HTTP_200_OK,

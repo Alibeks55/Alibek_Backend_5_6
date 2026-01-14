@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import Token
-from users.models import UsersCod, CustomUser
+from users.models import CustomUser
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class OauthCodeSerializer(serializers.Serializer):
@@ -45,18 +45,19 @@ class ConfirmationSerializer(serializers.Serializer):
     def validate(self, attrs):
         user_id = attrs.get('user_id')
         code = attrs.get('code')
-
-        try:
-            user = CustomUser.objects.get(id=user_id)
-        except CustomUser.DoesNotExist:
-            raise ValidationError('User does not exist!')
-
-        try:
-            confirmation_code = UsersCod.objects.get(user=user)
-        except UsersCod.DoesNotExist:
-            raise ValidationError('Confirmation code not found!')
-
-        if confirmation_code.code != code:
-            raise ValidationError('Invalid confirmation code!')
-
         return attrs
+
+        # try:
+        #     user = CustomUser.objects.get(id=user_id)
+        # except CustomUser.DoesNotExist:
+        #     raise ValidationError('User does not exist!')
+        #
+        # try:
+        #     confirmation_code = UsersCod.objects.get(user=user)
+        # except UsersCod.DoesNotExist:
+        #     raise ValidationError('Confirmation code not found!')
+        #
+        # if confirmation_code.code != code:
+        #     raise ValidationError('Invalid confirmation code!')
+        #
+        # return attrs
