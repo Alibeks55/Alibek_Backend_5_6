@@ -13,6 +13,9 @@ import random
 import string
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.cache import cache
+from users.tasks import add, send_otp_mail
+from time import sleep
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
@@ -22,6 +25,7 @@ class AuthorizationAPIView(CreateAPIView):
     serializer_class = UserAuthSerializer
 
     def post(self, request):
+
         serializer = UserAuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -47,6 +51,9 @@ class RegistrationAPIView(CreateAPIView):
     serializer_class = UserCreateSerializer
 
     def post(self, request, *args, **kwargs):
+
+        add.delay(2, 2)
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -70,6 +77,7 @@ class RegistrationAPIView(CreateAPIView):
                       code,
                       timeout=300
             )
+            send_otp_mail.delay(email, code)
 
         return Response(
             status=status.HTTP_201_CREATED,
